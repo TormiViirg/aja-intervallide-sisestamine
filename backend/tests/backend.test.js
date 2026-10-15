@@ -10,42 +10,67 @@ import { createScheduleService, ValidationError } from '../src/services/schedule
 import { runContract } from './repository.contract.js';
 
 runContract('memory', () => createMemoryRepository());
-test('Supabase repository maps reads, filters volunteers, and persists schedules', async () => {
+test('Supabase repository maps volunteer_schedule reads and persists interval versions', async () => {
   const rows = {
-    app_config: { allowed_range: { from: '2026-10-26', to: '2026-11-24' }, opening_times: { open: '07:45', close: '19:45', cinema: 'Solaris' } },
-    teams: [{ id: 'usher', name: 'Piletikontroll' }],
-    volunteers: [{ id: 1, name: 'Mari Tamm', festival: 'poff30', team: 'usher', location: 'Solaris', opened: [] }],
-    drafts: null,
-    publications: [],
+    festival: [{ id: 1, eligible_from: '2026-10-25T22:00:00.000Z', eligible_until: '2026-11-23T22:00:00.000Z', reported_time_zone: 'Europe/Tallinn' }],
+    location_opening_hours: [{ local_date: '2026-10-27', opens_at: '2026-10-27T07:00:00.000Z', closes_at: '2026-10-27T18:00:00.000Z', location: { name: 'Solaris' } }],
+    festival_team: [{ id: 10, festival_id: 1, team: { name: 'Usher' } }],
+    festival_team_location: [{ id: 100, festival_team_id: 10, location: { name: 'Solaris' } }],
+    volunteer_membership: [{ volunteer_id: 7, festival_team_location_id: 100, volunteer: { display_name: 'Mari Tamm' } }],
+    volunteer_day_open: [{ volunteer_id: 7, festival_team_id: 10, local_date: '2026-10-27' }],
+    volunteer_interval: [{ volunteer_id: 7, festival_team_location_id: 100, local_date: '2026-10-27', starts_at: '2026-10-27T07:00:00.000Z', ends_at: '2026-10-27T10:00:00.000Z', deleted_at: null }],
+    master_interval: [],
+    admin_interval: [],
   };
-  const queries = [];
-  const client = { from: (table) => {
-    const filters = [];
-    queries.push({ table, filters });
-    return {
-      select() { return this; },
-      eq(column, value) { filters.push(['eq', column, value]); return this; },
-      in(column, value) { filters.push(['in', column, value]); return this; },
-      order() { return this; },
-      single: async () => ({ data: rows[table], error: null }),
-      maybeSingle: async () => ({ data: rows[table], error: null }),
-      upsert: async (record) => { rows.drafts = { schedule: record.schedule }; return { data: null, error: null }; },
-      insert: async (record) => { rows.publications.push(record); return { data: null, error: null }; },
-      then: (resolve, reject) => Promise.resolve({ data: rows[table], error: null }).then(resolve, reject),
-    };
-  } };
-  const repo = createSupabaseRepository(client);
-  assert.deepEqual(await repo.getConfig(), { allowedRange: rows.app_config.allowed_range, openingTimes: rows.app_config.opening_times });
-  assert.deepEqual(await repo.listTeams(), rows.teams);
-  assert.deepEqual(await repo.listVolunteers({ festival: 'poff30', team: 'usher', locations: ['Solaris'] }), rows.volunteers);
-  assert.deepEqual(queries.at(-1).filters, [['eq', 'festival', 'poff30'], ['eq', 'team', 'usher'], ['in', 'location', ['Solaris']]]);
+  const nextIds = { master_interval: 1, admin_interval: 1 };
+  class Query {
+    constructor(table) { this.table = table; this.filters = []; this.action = 'select'; }
+    select() { return this; }
+    eq(column, value) { this.filters.push((row) => row[column] === value); return this; }
+    in(column, values) { this.filters.push((row) => values.includes(row[column])); return this; }
+    is(column, value) { this.filters.push((row) => (row[column] ?? null) === value); return this; }
+    gte(column, value) { this.filters.push((row) => row[column] >= value); return this; }
+    lte(column, value) { this.filters.push((row) => row[column] <= value); return this; }
+    order() { return this; }
+    insert(record) { this.action = 'insert'; this.record = record; return this; }
+    update(record) { this.action = 'update'; this.record = record; return this; }
+    execute() {
+      const selected = (rows[this.table] ?? []).filter((row) => this.filters.every((filter) => filter(row)));
+      if (this.action === 'insert') {
+        const record = { ...this.record, id: nextIds[this.table]++ };
+        rows[this.table].push(record);
+        return { data: [record], error: null };
+      }
+      if (this.action === 'update') {
+        selected.forEach((row) => Object.assign(row, this.record));
+      }
+      return { data: selected, error: null };
+    }
+    then(resolve, reject) { return Promise.resolve(this.execute()).then(resolve, reject); }
+    async single() { const result = this.execute(); return { data: result.data[0] ?? null, error: result.error }; }
+    async maybeSingle() { const result = this.execute(); return { data: result.data[0] ?? null, error: result.error }; }
+  }
+  const client = {
+    schema: (name) => { assert.equal(name, 'volunteer_schedule'); return client; },
+    from: (table) => new Query(table),
+  };
+  const repo = createSupabaseRepository(client, { festivalId: '1', adminUserId: '99' });
+  const config = await repo.getConfig();
+  assert.deepEqual(config.allowedRange, { from: '2026-10-26', to: '2026-11-24' });
+  assert.deepEqual(await repo.listTeams(), [{ id: '10', name: 'Usher' }]);
+  const volunteers = await repo.listVolunteers({ team: '10', locations: ['Solaris'] });
+  assert.equal(volunteers[0].name, 'Mari Tamm');
+  assert.deepEqual(volunteers[0].opened, [
+    { date: '2026-10-27', start: undefined, end: undefined },
+    { date: '2026-10-27', start: '09:00', end: '12:00' },
+  ]);
 
   const values = { '2026-10-27': { start: '10:00', end: '12:00' } };
-  await repo.saveDraft('usher', values);
-  assert.deepEqual(await repo.getDraft('usher'), values);
-  const publication = { values, publishAt: '2026-10-15T10:00:00.000Z', status: 'published' };
-  await repo.savePublication('usher', publication);
-  assert.deepEqual(rows.publications[0], { team_id: 'usher', schedule: values, publish_at: publication.publishAt, status: 'published' });
+  await repo.saveDraft('10', values);
+  assert.deepEqual(await repo.getDraft('10'), values);
+  await repo.savePublication('10', { values, publishAt: new Date('2026-10-15T10:00:00.000Z'), status: 'published' });
+  assert.equal(rows.master_interval[0].status_code, 'published');
+  assert.equal(rows.admin_interval[0].published_at !== null, true);
 });
 
 const NOW = new Date('2026-10-15T10:00:00Z'); // Estonia is UTC+3 (EEST) until 2026-10-25
