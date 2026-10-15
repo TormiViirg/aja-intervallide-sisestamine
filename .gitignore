@@ -4,3 +4,4 @@ test-results
 playwright-report
 /backend/.env
 /backend/node_modules/
+build the frontend in react and vit.txt

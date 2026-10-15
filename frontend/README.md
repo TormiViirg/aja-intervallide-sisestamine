@@ -12,6 +12,35 @@ npm run test:e2e     # 28 Playwright tests, desktop 1440×1024 + Pixel 7, uses t
 npm run build
 ```
 
+## Running against the backend
+
+By default, `npm run dev` talks to the Express backend in `../backend`. Vite proxies `/api` to `http://localhost:3001`; set `VITE_API_PROXY_TARGET` to point it elsewhere. The backend decides where the data lives:
+- **With credentials:** if `backend/.env` holds the Supabase credentials, data comes from Supabase.
+- **Without them:** the backend uses its in-memory sample data.
+
+```bash
+cd ../backend && npm install && npm start   # API on :3001 (needs backend/.env for Supabase)
+cd ../frontend && npm run dev               # UI on :5173, /api → :3001
+npm run dev:mock                            # UI with in-browser dummy data, no backend needed
+npm run test:fullstack                      # Playwright: this UI against the real backend app (in-memory)
+```
+
+The HTTP adapters (`src/adapters/http/`) translate between the backend's API and the frontend:
+
+| Backend | Frontend |
+|---|---|
+| `GET /api/config`: `allowedRange` and the opening times (`openingHours` per day/location with Supabase, else one time for every day) | eligibility window, locations, opening times |
+| `GET /api/teams` and `GET /api/teams/:id/draft` | teams and their schedules. Times are Estonian `HH:MM` and are stored as UTC here. |
+| `GET /api/volunteers?festival&team`, called once per team and merged | volunteers and their opened intervals |
+| `PUT /api/teams/:id/draft`, `POST /api/teams/:id/publish` (`at` in Estonian local time) | saving drafts, publishing now or scheduling. A 422 response appears as the overview's validation message. |
+| `POST /api/teams/:id/preview` | the affected and to-notify names in the overview |
+| cookie `tz` | the timezone cookie the backend reads as `browserTz` |
+
+**Current API limits.** The frontend handles these without backend changes:
+- **Status:** there is no endpoint for the published version or its status, so schedules load as drafts. The "changed after publishing" marker and the U-turn compare against the last saved draft.
+- **Change age:** there are no change timestamps, so loaded days have no 24 h / 72 h colouring.
+- **Mass marks:** marks from the bulk overwrite and column locks last only for the session.
+
 ## Architecture: ports and adapters
 
 ```

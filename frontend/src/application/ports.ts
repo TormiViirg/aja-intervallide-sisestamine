@@ -41,6 +41,16 @@ export interface ScheduleRepository {
   /** Which earlier mass-overwrite batches marked which days. */
   loadMassMarks(festivalId: FestivalId): Promise<LedgerState>;
   saveDraft(teamId: TeamId, entries: EntryMap): Promise<{ savedAt: UtcIso }>;
+  /**
+   * Optional server-side impact of changing these days: names of volunteers who opened an
+   * interval on them, and of those whose interval differs. null when the server can't judge
+   * (e.g. incomplete days).
+   */
+  previewImpact?(
+    teamId: TeamId,
+    edits: EntryMap,
+    locationIds: readonly LocationId[],
+  ): Promise<{ readonly affected: readonly string[]; readonly notify: readonly string[] } | null>;
   publish(teamIds: readonly TeamId[], choice: PublishChoice, entries: Readonly<Record<TeamId, EntryMap>>): Promise<PublishResult>;
 }
 

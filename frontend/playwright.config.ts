@@ -15,7 +15,8 @@ export default defineConfig({
     { name: 'phone', use: { ...devices['Pixel 7'], channel: 'chrome' } },
   ],
   webServer: {
-    command: 'npx vite --port 5199 --strictPort',
+    // e2e runs against the in-browser mock data, independent of the backend.
+    command: 'npx vite --mode mock --port 5199 --strictPort',
     url: 'http://localhost:5199',
     reuseExistingServer: true,
   },
