@@ -1,0 +1,307 @@
+/*
+ * Interval card. Coordinates are design pixels at 1× (measured on the 4× export ÷ 4).
+ * Card: 212.5 × 93. Opening box 94 × 28 at top-left. "Before opening" block covers
+ * x ≥ 114, y < 46. Dashed divider at y = 46.5. Start centred at y = 25, end at y = 71.
+ */
+.card {
+  --bg: var(--paper);
+  position: relative;
+  width: 100%;
+  height: calc(var(--card-h) * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+  background: var(--bg);
+  touch-action: manipulation;
+  user-select: none;
+}
+.card--day {
+  --bg: var(--recency-day);
+}
+.card--three {
+  --bg: var(--recency-three);
+}
+.card--older {
+  --bg: var(--recency-older);
+}
+
+/* Kestab südaööst kauem — grey halo half a gap wide. */
+.card--overnight {
+  box-shadow: 0 0 0 calc(10 * var(--u)) var(--halo);
+}
+
+.card:focus-visible,
+.card:focus-within {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 calc(2 * var(--u)) var(--ink),
+    calc(4 * var(--u)) calc(4 * var(--u)) 0 var(--ink);
+}
+
+/* Opening times of the selected cinemas (superadmin data). */
+.card__open {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: calc(91 * var(--u));
+  padding: calc(1.5 * var(--u)) calc(4 * var(--u)) calc(1.5 * var(--u)) calc(3 * var(--u));
+  background: var(--gray-opening);
+  color: var(--paper);
+  font-size: calc(9.4 * var(--u));
+  line-height: calc(11.25 * var(--u));
+  white-space: nowrap;
+  pointer-events: none;
+}
+.card__loc {
+  font-family: var(--font-sans);
+  font-size: calc(9.5 * var(--u));
+}
+
+.card__date {
+  position: absolute;
+  left: calc(18 * var(--u));
+  top: calc(31 * var(--u));
+  /* cap height 18.75 → 25.7; tight tracking restores the measured 70 width */
+  font-size: calc(25.7 * var(--u));
+  font-weight: 300;
+  line-height: calc(36 * var(--u));
+  letter-spacing: -0.055em;
+  pointer-events: none;
+}
+.card__weekday {
+  display: none;
+}
+
+/* Enne avamisaega märgitud aeg — black top-right block behind the start. */
+.card__early {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(98.5 * var(--u));
+  height: calc(46 * var(--u));
+  background: var(--ink);
+}
+.card--early .card__early {
+  display: block;
+}
+.card--early .card__start {
+  color: var(--paper);
+}
+
+.card__dash {
+  position: absolute;
+  top: calc(46.5 * var(--u));
+  right: calc(7.5 * var(--u));
+  width: calc(83 * var(--u));
+  border-top: calc(1 * var(--u)) dashed var(--ink);
+}
+.card--early .card__dash {
+  border-top-color: var(--ink);
+}
+
+.card__start,
+.card__end {
+  position: absolute;
+  right: calc(9 * var(--u));
+  height: calc(24 * var(--u));
+}
+.card__start {
+  top: calc(13 * var(--u));
+}
+.card__end {
+  top: calc(59 * var(--u));
+}
+
+.card__foot {
+  position: absolute;
+  left: calc(4 * var(--u));
+  bottom: calc(2 * var(--u));
+  font-size: calc(8.5 * var(--u));
+  line-height: calc(12 * var(--u));
+  display: flex;
+  gap: calc(3 * var(--u));
+  pointer-events: none;
+}
+.card__foot > span {
+  pointer-events: auto;
+}
+.card__foot-icon {
+  width: calc(9 * var(--u));
+  height: calc(9 * var(--u));
+  vertical-align: calc(-1 * var(--u));
+}
+
+/* Avaldamisjärgne aja ülekirjutus — the card sits on a stack of earlier versions. */
+.card__sheets {
+  position: absolute;
+  inset: calc(-1 * var(--u));
+  z-index: -1;
+  pointer-events: none;
+}
+.card__sheets::before,
+.card__sheets::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: calc(1 * var(--u)) solid var(--ink);
+  background: var(--paper);
+}
+.card__sheets::before {
+  transform: translate(calc(4 * var(--u)), calc(-4 * var(--u)));
+}
+.card__sheets::after {
+  z-index: -1;
+  transform: translate(calc(8 * var(--u)), calc(-8 * var(--u)));
+  background: linear-gradient(170deg, var(--stack-shade), var(--paper) 30%);
+}
+
+/* Mass overwrite marks: rectangles left of the card; top half = start, bottom half = end. */
+.card__marks {
+  position: absolute;
+  top: calc(-1 * var(--u));
+  bottom: calc(-1 * var(--u));
+  left: calc(-9 * var(--u));
+  width: calc(8 * var(--u));
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  pointer-events: none;
+}
+
+.card--problem {
+  border-color: var(--error);
+}
+.card__problem {
+  position: absolute;
+  right: calc(4 * var(--u));
+  bottom: calc(-15 * var(--u));
+  font-size: calc(10.5 * var(--u));
+  color: var(--error);
+  white-space: nowrap;
+}
+
+.card--paint {
+  cursor: crosshair;
+}
+.card--paint .tf__value {
+  cursor: crosshair;
+}
+.card--locked,
+.card--locked .tf__value {
+  cursor: not-allowed;
+}
+
+/* ---- Time field ---------------------------------------------------------------- */
+.tf {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(7.5 * var(--u));
+}
+.tf__value,
+.tf__input {
+  font-size: calc(14.7 * var(--u));
+  line-height: calc(24 * var(--u));
+}
+.tf__value {
+  padding: 0 calc(2 * var(--u));
+}
+.tf__value:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.tf__input {
+  width: calc(66 * var(--u));
+  height: calc(24 * var(--u));
+  border: calc(1 * var(--u)) solid currentColor;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 0 calc(3 * var(--u));
+}
+.tf__input[aria-invalid='true'] {
+  border-color: var(--error);
+  background: var(--error-tint);
+}
+.tf__clock {
+  width: calc(19 * var(--u));
+  height: calc(19 * var(--u));
+  flex: none;
+}
+.tf__prefix {
+  font-size: calc(16 * var(--u));
+  margin-right: calc(-1 * var(--u));
+}
+.tf__revert {
+  width: calc(21 * var(--u));
+  height: calc(21 * var(--u));
+  display: grid;
+  place-items: center;
+}
+.tf__revert svg {
+  width: 100%;
+  height: 100%;
+}
+.tf__error {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 5;
+  background: var(--paper);
+  color: var(--error);
+  border: calc(1 * var(--u)) solid var(--error);
+  font-size: calc(11 * var(--u));
+  padding: calc(1 * var(--u)) calc(4 * var(--u));
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .card {
+    height: calc(104 * var(--u));
+  }
+  .card__weekday {
+    display: block;
+    position: absolute;
+    left: calc(18 * var(--u));
+    top: calc(33 * var(--u));
+    font-size: calc(14 * var(--u));
+    color: var(--gray-label);
+  }
+  .card--day .card__weekday {
+    color: var(--ink);
+  }
+  .card__date {
+    top: calc(48 * var(--u));
+  }
+  .card__start {
+    top: calc(14 * var(--u));
+  }
+  .card__dash {
+    top: calc(51.5 * var(--u));
+  }
+  .card__end {
+    top: calc(66 * var(--u));
+  }
+  .card__early {
+    height: calc(51 * var(--u));
+  }
+  /* Small print scaled up to stay legible at phone size. */
+  .card__open {
+    font-size: calc(11 * var(--u));
+    line-height: calc(13 * var(--u));
+  }
+  .card__loc {
+    font-size: calc(11.5 * var(--u));
+  }
+  .card__foot {
+    font-size: calc(11 * var(--u));
+    line-height: calc(14 * var(--u));
+  }
+  .card__foot-icon {
+    width: calc(11 * var(--u));
+    height: calc(11 * var(--u));
+  }
+  .card__weekday {
+    top: calc(36 * var(--u));
+  }
+  .tf__value {
+    font-size: calc(17 * var(--u));
+  }
+}

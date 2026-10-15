@@ -1,0 +1,300 @@
+/* Header — sits on the card grid: status | locations | period (2 cols) | team | volunteers */
+.hdr {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), calc(var(--col-w) * var(--u)));
+  column-gap: calc(var(--col-gap) * var(--u));
+  padding: 0 calc(var(--gutter-r) * var(--u)) 0 calc(var(--margin-l) * var(--u));
+  height: calc(99 * var(--u));
+  align-items: start;
+  position: relative;
+  z-index: 20;
+}
+/* An open menu or calendar must sit above the sticky/fixed footer (z 30) and the volunteer
+   panel (z 35); on phones the calendar is a bottom sheet the footer would otherwise cover. */
+.hdr:has(.popover, .rp) {
+  z-index: 45;
+}
+
+.hdr__label {
+  font-size: calc(24 * var(--u));
+  line-height: calc(30 * var(--u));
+  white-space: nowrap;
+}
+.hdr__label--muted {
+  color: var(--gray-label);
+}
+
+.hdr__chev {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  flex: none;
+}
+
+.hdr__status {
+  grid-column: 1;
+}
+.hdr__status-value {
+  font-size: calc(24 * var(--u));
+  line-height: calc(36 * var(--u));
+  font-weight: 500;
+  margin-left: calc(12 * var(--u));
+  white-space: nowrap;
+}
+.hdr__stamp {
+  font-size: calc(16 * var(--u));
+  color: var(--gray-label);
+  margin-left: calc(24 * var(--u));
+  margin-top: calc(3 * var(--u));
+}
+
+.hdr__picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-left: calc(11 * var(--u));
+  text-align: left;
+}
+
+.hdr__locations {
+  grid-column: 2;
+  position: relative;
+}
+.hdr__chips {
+  list-style: none;
+  margin: calc(6 * var(--u)) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(3 * var(--u));
+  background: var(--chip);
+  font-size: calc(12.75 * var(--u));
+  line-height: calc(22 * var(--u));
+  padding: 0 calc(3 * var(--u)) 0 calc(4 * var(--u));
+}
+.chip__x {
+  display: inline-grid;
+  place-items: center;
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
+}
+.chip__x svg {
+  width: 100%;
+  height: 100%;
+}
+.hdr__hint {
+  font-size: calc(13 * var(--u));
+  color: var(--gray-label);
+  margin: calc(6 * var(--u)) 0 0;
+}
+
+.hdr__range {
+  grid-column: 3 / -3;
+  text-align: center;
+  position: relative;
+}
+.hdr__range-title {
+  font-size: calc(24 * var(--u));
+}
+.hdr__range-value {
+  /* cap height 19.6 → 27; letter-spacing restores the measured 439 width */
+  font-size: calc(27 * var(--u));
+  font-weight: 300;
+  line-height: calc(52 * var(--u));
+  letter-spacing: 0.11em;
+  white-space: nowrap;
+  padding: 0 calc(6 * var(--u));
+  border-bottom: calc(1 * var(--u)) solid transparent;
+}
+.hdr__range-value:hover,
+.hdr__range-value[aria-expanded='true'] {
+  border-bottom-color: var(--ink);
+}
+
+.hdr__team {
+  grid-column: -3 / -2;
+  position: relative;
+}
+.hdr__team .hdr__picker {
+  padding-left: calc(4 * var(--u));
+}
+.hdr__team-value {
+  font-size: calc(24 * var(--u));
+  line-height: calc(36 * var(--u));
+  color: var(--gray-value);
+  margin: calc(8 * var(--u)) 0 0 calc(4 * var(--u));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hdr__volunteers {
+  grid-column: -2 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: calc(24 * var(--u));
+  line-height: calc(36 * var(--u));
+  padding: 0 calc(6 * var(--u)) 0 calc(16 * var(--u));
+  white-space: nowrap;
+}
+
+/* Dropdown menus */
+.popover {
+  position: absolute;
+  background: var(--paper);
+  border: calc(1 * var(--u)) solid var(--ink);
+  box-shadow: calc(4 * var(--u)) calc(4 * var(--u)) 0 var(--ink);
+  z-index: 40;
+}
+.hdr__menu {
+  top: calc(34 * var(--u));
+  left: 0;
+  min-width: 100%;
+  padding: calc(8 * var(--u)) calc(10 * var(--u));
+  display: grid;
+  gap: calc(6 * var(--u));
+}
+.hdr__menu--right {
+  left: auto;
+  right: 0;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  font-size: calc(17 * var(--u));
+  line-height: calc(26 * var(--u));
+  cursor: pointer;
+}
+.check input {
+  accent-color: var(--ink);
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
+}
+.hdr__parked {
+  border-top: calc(1 * var(--u)) solid var(--gray-line);
+  padding-top: calc(6 * var(--u));
+  display: grid;
+  gap: calc(4 * var(--u));
+}
+.hdr__parked-title {
+  font-size: calc(13 * var(--u));
+  color: var(--gray-label);
+}
+.hdr__continue {
+  text-align: left;
+  font-size: calc(15 * var(--u));
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* Language switch — the design's banner is not part of this tool, so it lives top-right. */
+.lang {
+  position: absolute;
+  top: calc(4 * var(--u));
+  right: calc(var(--gutter-r) * var(--u));
+  display: flex;
+  gap: calc(10 * var(--u));
+  font-size: calc(14 * var(--u));
+  z-index: 25;
+}
+.lang button {
+  color: var(--gray-value);
+  letter-spacing: 0.04em;
+}
+.lang button[aria-pressed='true'] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+@media (max-width: 760px) {
+  .hdr {
+    grid-template-columns: 1fr;
+    height: auto;
+    row-gap: calc(14 * var(--u));
+    padding: calc(4 * var(--u)) calc(16 * var(--u)) calc(14 * var(--u));
+  }
+  .hdr > * {
+    grid-column: 1 !important;
+  }
+  .hdr__status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: calc(8 * var(--u));
+  }
+  .hdr__status-value {
+    margin-left: 0;
+    white-space: normal;
+    font-size: calc(22 * var(--u));
+    line-height: calc(26 * var(--u));
+  }
+  .hdr__stamp {
+    margin-left: 0;
+    flex-basis: 100%;
+    font-size: calc(14 * var(--u));
+  }
+  .hdr__label,
+  .hdr__range-title {
+    font-size: calc(19 * var(--u));
+    line-height: calc(24 * var(--u));
+    white-space: normal;
+  }
+  .hdr__range {
+    text-align: left;
+  }
+  .hdr__range-value {
+    font-size: calc(19 * var(--u));
+    letter-spacing: 0.04em;
+    padding: 0;
+    border-bottom-color: var(--ink);
+    line-height: calc(34 * var(--u));
+  }
+  .hdr__picker {
+    padding-left: 0;
+  }
+  .hdr__team .hdr__picker {
+    padding-left: 0;
+  }
+  .hdr__team-value {
+    font-size: calc(19 * var(--u));
+    line-height: calc(24 * var(--u));
+    margin: calc(2 * var(--u)) 0 0;
+  }
+  .hdr__chips {
+    margin-top: calc(4 * var(--u));
+  }
+  .chip {
+    font-size: calc(15 * var(--u));
+    line-height: calc(28 * var(--u));
+  }
+  .chip__x {
+    width: calc(24 * var(--u));
+    height: calc(24 * var(--u));
+  }
+  .hdr__volunteers {
+    border: calc(1 * var(--u)) solid var(--ink);
+    padding: calc(6 * var(--u)) calc(10 * var(--u));
+    font-size: calc(20 * var(--u));
+  }
+  .hdr__menu {
+    top: calc(28 * var(--u));
+  }
+  .lang {
+    position: static;
+    justify-content: flex-end;
+    padding: calc(8 * var(--u)) calc(16 * var(--u)) 0;
+    font-size: calc(15 * var(--u));
+  }
+  .lang button {
+    min-width: calc(32 * var(--u));
+    min-height: calc(32 * var(--u));
+  }
+}

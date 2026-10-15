@@ -1,0 +1,63 @@
+/*
+ * --u: one source-design pixel (see tokens.css). Desktop: 7 day columns on the 14-column grid;
+ * the design width in source units is margin + 7·(day + gutter) − gutter + margin = 1440 / k,
+ * so at a 1440 viewport --u = k px. Capped so huge monitors don't get billboard type.
+ * Phones use a 390 base.
+ * --vw is the root's client width (scrollbar excluded), kept current by useViewportWidth().
+ */
+.app {
+  --cols: 7;
+  --design-w: calc(var(--margin-l) + var(--cols) * (var(--col-w) + var(--col-gap)) - var(--col-gap) + var(--gutter-r));
+  --u: min(calc(var(--vw) / var(--design-w)), 1.6px);
+  --app-right: max(0px, calc((var(--vw) - var(--design-w) * var(--u)) / 2));
+  position: relative;
+  width: calc(var(--design-w) * var(--u));
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.app > .board,
+.app > .ov {
+  flex: 1;
+}
+
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: calc(140 * var(--u));
+  translate: -50% 0;
+  display: grid;
+  gap: calc(6 * var(--u));
+  z-index: 60;
+}
+.toast {
+  background: var(--ink);
+  color: var(--paper);
+  font-size: calc(16 * var(--u));
+  padding: calc(8 * var(--u)) calc(16 * var(--u));
+  animation: toast-in 180ms ease-out;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    translate: 0 calc(6 * var(--u));
+  }
+}
+
+.loading {
+  font: 400 20px/1.4 var(--font-sans);
+  padding: 32px;
+}
+
+@media (max-width: 760px) {
+  .app {
+    --u: calc(var(--vw) / 390);
+    --app-right: 0px;
+    width: 100%;
+    padding-bottom: calc(84 * var(--u));
+  }
+  .toasts {
+    bottom: calc(80 * var(--u));
+  }
+}
