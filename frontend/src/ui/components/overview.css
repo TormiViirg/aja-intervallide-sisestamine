@@ -1,0 +1,220 @@
+/* Overview — keeps the board's margins and type scale; tables use hairline ink rules. */
+.ov {
+  padding: calc(8 * var(--u)) calc(var(--gutter-r) * var(--u)) calc(60 * var(--u)) calc(var(--margin-l) * var(--u));
+  max-width: calc((var(--margin-l) + 5 * 233 + var(--gutter-r)) * var(--u));
+}
+.ov h2 {
+  font-weight: 500;
+  font-size: calc(22 * var(--u));
+  margin: 0 0 calc(10 * var(--u));
+}
+.ov h3 {
+  font-weight: 400;
+  font-size: calc(17 * var(--u));
+  color: var(--gray-label);
+  margin: 0 0 calc(8 * var(--u));
+}
+.ov__top {
+  display: flex;
+  align-items: center;
+  gap: calc(24 * var(--u));
+  border-bottom: calc(1 * var(--u)) solid var(--ink);
+  padding-bottom: calc(12 * var(--u));
+  margin-bottom: calc(20 * var(--u));
+}
+.ov__back {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  font-size: calc(17 * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+  padding: calc(8 * var(--u)) calc(14 * var(--u));
+}
+.ov__back svg {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+}
+.ov__title {
+  font-weight: 700;
+  font-size: calc(30 * var(--u));
+  margin: 0;
+}
+
+.ov__warnings {
+  border: calc(1 * var(--u)) solid var(--ink);
+  border-left: calc(18 * var(--u)) solid transparent;
+  border-image: none;
+  background:
+    repeating-linear-gradient(-45deg, var(--ink) 0 calc(2 * var(--u)), var(--paper) calc(2 * var(--u)) calc(5 * var(--u))) left / calc(18 * var(--u)) 100% no-repeat
+      border-box,
+    var(--paper) padding-box;
+  padding: calc(12 * var(--u)) calc(16 * var(--u));
+  margin-bottom: calc(24 * var(--u));
+}
+.ov__warnings ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: calc(8 * var(--u));
+  font-size: calc(16 * var(--u));
+}
+.ov__warnings li {
+  display: flex;
+  gap: calc(14 * var(--u));
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.ov__link {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  font-weight: 500;
+}
+
+.ov__team {
+  margin-bottom: calc(28 * var(--u));
+}
+.ov__team-name {
+  border-bottom: calc(1 * var(--u)) solid var(--ink);
+  padding-bottom: calc(4 * var(--u));
+}
+.ov__cols {
+  display: grid;
+  grid-template-columns: calc((2 * 233 + 212.5) * var(--u)) 1fr;
+  gap: calc(20.5 * var(--u));
+}
+.ov__table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: calc(15 * var(--u));
+}
+.ov__table th,
+.ov__table td {
+  border-bottom: calc(1 * var(--u)) solid var(--gray-line);
+  padding: calc(5 * var(--u)) calc(8 * var(--u)) calc(5 * var(--u)) 0;
+  text-align: left;
+  font-weight: 400;
+}
+.ov__table thead th {
+  border-bottom-color: var(--ink);
+  color: var(--gray-label);
+}
+.ov__num {
+  text-align: right !important;
+  width: calc(40 * var(--u));
+}
+.ov__summary {
+  font-size: calc(17 * var(--u));
+  margin: 0 0 calc(8 * var(--u));
+}
+.ov__names {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 2;
+  column-gap: calc(20 * var(--u));
+  font-size: calc(15 * var(--u));
+  line-height: calc(22 * var(--u));
+}
+.ov__notify {
+  font-weight: 500;
+}
+.ov__tag {
+  margin-left: calc(6 * var(--u));
+  font-size: calc(11 * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+  padding: 0 calc(4 * var(--u));
+  font-weight: 400;
+}
+.ov__muted {
+  color: var(--gray-label);
+  font-size: calc(15 * var(--u));
+  margin: 0;
+}
+
+.ov__publish {
+  border-top: calc(1 * var(--u)) solid var(--ink);
+  padding-top: calc(16 * var(--u));
+  display: grid;
+  gap: calc(12 * var(--u));
+  justify-items: start;
+}
+.ov__modes {
+  display: flex;
+  gap: calc(24 * var(--u));
+  flex-wrap: wrap;
+  font-size: calc(17 * var(--u));
+}
+.ov__mode {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  cursor: pointer;
+}
+.ov__mode input {
+  accent-color: var(--ink);
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
+}
+.ov__when {
+  display: flex;
+  gap: calc(18 * var(--u));
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.ov__when label {
+  display: grid;
+  gap: calc(4 * var(--u));
+  font-size: calc(14 * var(--u));
+  color: var(--gray-label);
+}
+.ov__when input {
+  font-size: calc(18 * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+  padding: calc(5 * var(--u)) calc(8 * var(--u));
+  color: var(--ink);
+  width: calc(170 * var(--u));
+}
+.ov__when input[aria-invalid='true'] {
+  border-color: var(--error);
+  background: var(--error-tint);
+}
+.ov__errors {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--error);
+  font-size: calc(15 * var(--u));
+}
+.ov__submit {
+  margin-top: calc(4 * var(--u));
+  width: calc(212.5 * var(--u));
+  font-size: calc(22.5 * var(--u));
+  gap: calc(18 * var(--u));
+}
+
+@media (max-width: 760px) {
+  .ov {
+    padding: calc(8 * var(--u)) calc(16 * var(--u)) calc(60 * var(--u));
+  }
+  .ov__top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(10 * var(--u));
+  }
+  .ov__title {
+    font-size: calc(24 * var(--u));
+  }
+  .ov__cols {
+    grid-template-columns: 1fr;
+  }
+  .ov__names {
+    columns: 1;
+  }
+  .ov__submit {
+    width: 100%;
+  }
+  .ov__table {
+    font-size: calc(13 * var(--u));
+  }
+}

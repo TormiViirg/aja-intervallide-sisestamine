@@ -1,0 +1,98 @@
+/*
+ * The warning sits in the 22-unit band above the header that the removed site banner left.
+ * Collapsed it is one line; open it adds the explanation. The hatched stripe is the
+ * "attention" signifier in a palette that has no warning colour.
+ */
+.tzw {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  min-height: calc(22 * var(--u));
+  margin: 0 calc(var(--gutter-r) * var(--u)) 0 calc(var(--margin-l) * var(--u));
+  padding-right: calc(4 * var(--u));
+  font-size: calc(14 * var(--u));
+  line-height: calc(16 * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+  max-width: calc(4 * 233 * var(--u));
+}
+.tzw--collapsed {
+  border-color: transparent;
+  max-width: max-content;
+}
+.tzw__stripe {
+  align-self: stretch;
+  width: calc(18 * var(--u));
+  flex: none;
+  background: repeating-linear-gradient(-45deg, var(--ink) 0 calc(2 * var(--u)), var(--paper) calc(2 * var(--u)) calc(5 * var(--u)));
+}
+.tzw__title {
+  font-weight: 500;
+  white-space: nowrap;
+}
+.tzw__body {
+  color: var(--gray-label);
+  padding: calc(4 * var(--u)) 0;
+}
+.tzw__eye {
+  margin-left: auto;
+  width: calc(26 * var(--u));
+  height: calc(22 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.tzw__eye svg {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+}
+
+.mprog {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .tzw {
+    margin: 0 calc(16 * var(--u)) calc(10 * var(--u));
+    max-width: none;
+    font-size: calc(13 * var(--u));
+    align-items: flex-start;
+  }
+  .tzw__title {
+    white-space: normal;
+    padding: calc(4 * var(--u)) 0;
+  }
+  .tzw:not(.tzw--collapsed) {
+    flex-wrap: wrap;
+  }
+  .tzw:not(.tzw--collapsed) .tzw__body {
+    order: 3;
+    flex-basis: 100%;
+    padding-left: calc(28 * var(--u));
+  }
+  .mprog {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--paper);
+    padding: calc(8 * var(--u)) calc(16 * var(--u)) calc(10 * var(--u));
+    border-bottom: calc(1 * var(--u)) solid var(--ink);
+    margin-bottom: calc(14 * var(--u));
+  }
+  .mprog__label {
+    font-size: calc(14 * var(--u));
+    margin-bottom: calc(6 * var(--u));
+  }
+  .mprog__bar {
+    display: flex;
+    gap: calc(2 * var(--u));
+    height: calc(10 * var(--u));
+  }
+  .mprog__seg {
+    flex: 1;
+    border: calc(1 * var(--u)) solid var(--ink);
+  }
+  .mprog__seg--done {
+    background: var(--ink);
+  }
+}

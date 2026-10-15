@@ -1,0 +1,129 @@
+/*
+ * Board grid: columns of 212.5 with 20.5 gaps, a 32 left margin and a 33 right gutter that
+ * holds each week's vertical total. Day headers are 48 tall; rows are 93 + 20.
+ */
+.board {
+  position: relative;
+  z-index: 0; /* stacking context so card__sheets (z −1) paint between board and card */
+  display: grid;
+  grid-template-columns: repeat(var(--cols), calc(var(--col-w) * var(--u)));
+  column-gap: calc(var(--col-gap) * var(--u));
+  row-gap: calc(var(--row-gap) * var(--u));
+  /* the board is flex:1 — keep auto rows at content height instead of stretching */
+  align-content: start;
+  padding: 0 calc(var(--gutter-r) * var(--u)) calc(28 * var(--u)) calc(var(--margin-l) * var(--u));
+}
+.board--paint {
+  touch-action: none;
+}
+
+.board__heads,
+.week {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  position: relative;
+}
+
+.dh {
+  height: calc(48 * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.dh__name {
+  font-weight: 700;
+  font-size: calc(23.5 * var(--u));
+  line-height: 1;
+  letter-spacing: 0.005em;
+  padding-bottom: calc(2 * var(--u));
+}
+button.dh__name {
+  text-decoration: underline dashed;
+  text-decoration-thickness: calc(1 * var(--u));
+  text-underline-offset: 0.18em;
+}
+.dh__lock {
+  position: absolute;
+  right: calc(10 * var(--u));
+  top: 50%;
+  translate: 0 -50%;
+  width: calc(26 * var(--u));
+  height: calc(30 * var(--u));
+  color: var(--gray-lock-open);
+}
+.dh__lock svg {
+  width: 100%;
+  height: 100%;
+}
+.dh--locked .dh__lock {
+  color: var(--gray-opening);
+}
+
+.week__head {
+  display: none;
+}
+
+.board__empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: calc(24 * var(--u)) 0;
+  font-size: calc(18 * var(--u));
+  color: var(--gray-label);
+}
+
+.week__total {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* immediately after the last occupied column; for a full row that is the right gutter */
+  left: calc(((var(--last-col) + 1) * (var(--col-w) + var(--col-gap)) - var(--col-gap)) * var(--u));
+  width: calc(var(--gutter-r) * var(--u));
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(16 * var(--u));
+  letter-spacing: 0.06em;
+  color: var(--gray-label);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .board {
+    grid-template-columns: 1fr;
+    padding: 0 calc(16 * var(--u)) calc(24 * var(--u)) calc(26 * var(--u));
+    row-gap: calc(22 * var(--u));
+  }
+  .board__heads {
+    display: none;
+  }
+  .week {
+    grid-template-columns: 1fr;
+    row-gap: calc(18 * var(--u));
+  }
+  .week__cell {
+    grid-column: 1 !important;
+  }
+  .week__head {
+    display: flex;
+    justify-content: space-between;
+    font-size: calc(14 * var(--u));
+    color: var(--gray-label);
+    border-bottom: calc(1 * var(--u)) solid var(--ink);
+    padding-bottom: calc(4 * var(--u));
+    margin-left: calc(-10 * var(--u));
+  }
+  .week__total {
+    position: absolute;
+    writing-mode: horizontal-tb;
+    inset: 0 0 auto auto;
+    left: auto;
+    width: auto;
+    height: calc(23 * var(--u));
+    font-size: calc(14 * var(--u));
+    color: var(--ink);
+  }
+}

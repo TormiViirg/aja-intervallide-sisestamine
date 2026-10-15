@@ -1,0 +1,67 @@
+/*
+ * Design tokens. All colours are OKLCH (lightness sampled from the 4× design exports).
+ * All lengths are multiples of --u: one design pixel at 1× (export ÷ 4). --u is derived
+ * from the container width so the whole layout scales with the viewport, keeping the
+ * original's proportions exactly.
+ */
+/* --vw is overwritten from JS with the scrollbar-free width; 100vw is the no-JS fallback. */
+:root {
+  --vw: 100vw;
+  --ink: oklch(0 0 0);
+  --paper: oklch(1 0 0);
+  --gray-opening: oklch(0.402 0 0);
+  --gray-label: oklch(0.45 0 0);
+  --gray-lock-open: oklch(0.5 0 0);
+  --gray-value: oklch(0.6 0 0);
+  --gray-disabled: oklch(0.78 0 0);
+  --gray-line: oklch(0.86 0 0);
+  --chip: oklch(0.9 0 0);
+  --recency-day: oklch(0.676 0 0);
+  --recency-three: oklch(0.823 0 0);
+  --recency-older: oklch(0.925 0 0);
+  --halo: oklch(0.851 0 0);
+  --legend-halo: oklch(0.751 0 0);
+  --stack-shade: oklch(0.623 0 0);
+  /* The selected range in the calendars — intentionally a barely visible change. */
+  --range-tint: oklch(0.968 0 0);
+  --error: oklch(0.52 0.19 27);
+  --error-tint: oklch(0.96 0.02 27);
+
+  /* Identified from the exports: width/cap-height ratio 16.45 matches Fira Sans Extra Condensed (16.47). */
+  --font-sans: 'Fira Sans Extra Condensed', 'Arial Narrow', system-ui, sans-serif;
+  /* Dotted zero, tall digits, flagged 1: JetBrains Mono. */
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  /*
+   * Grid. The source design is a 12-column grid at 1440 (margin 32, gutter 20); one day spans
+   * 2 columns: 2·(1440 − 2·32 − 11·20)/12 + 20 = 212.667. With Sunday the week needs 7 days =
+   * 14 columns, laid out on a common 14-column grid at 1440: margin 24, gutter 16, so a day is
+   * 2·(1440 − 2·24 − 13·16)/14 + 16 = 185.143.
+   *
+   * --u stays "one source-design pixel" so every measured ratio inside a day (card, type, icons)
+   * is kept; it is scaled by k = 185.143 / 212.667 so a source day lands exactly on a 14-col day.
+   * The grid metrics below are therefore the 14-column values expressed in source units (÷ k).
+   */
+  --grid-margin: 24;
+  --grid-gutter: 16;
+  --src-day: 212.667;
+  --day: 185.143;
+  --k: calc(var(--day) / var(--src-day));
+  --col-w: var(--src-day);
+  --margin-l: calc(var(--grid-margin) / var(--k));
+  --col-gap: calc(var(--grid-gutter) / var(--k));
+  --gutter-r: calc(var(--grid-margin) / var(--k));
+  --row-gap: calc(var(--grid-gutter) / var(--k));
+  --card-h: 93;
+
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

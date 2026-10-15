@@ -1,0 +1,193 @@
+/*
+ * Range picker. Visual language borrowed from the interval cards: hairline ink borders,
+ * mono numerals, condensed labels. A day cell is a 7th of a card width; the selected
+ * period is a barely-there tint (ΔL ≈ 0.03) so it reads as context, not as a selection.
+ */
+.rp {
+  position: absolute;
+  top: calc(92 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(2 * 212.5 * var(--u) + 2 * 20.5 * var(--u) + 2 * 212.5 * var(--u) * 0.55);
+  max-width: calc(100vw - 32px);
+  background: var(--paper);
+  border: calc(1 * var(--u)) solid var(--ink);
+  box-shadow: calc(4 * var(--u)) calc(4 * var(--u)) 0 var(--ink);
+  z-index: 50;
+  text-align: left;
+  padding: calc(16 * var(--u)) calc(20 * var(--u)) calc(14 * var(--u));
+}
+
+.rp__calendars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: calc(20.5 * var(--u));
+}
+
+.rp__side + .rp__side {
+  border-left: calc(1 * var(--u)) dashed var(--ink);
+  padding-left: calc(20.5 * var(--u));
+}
+
+.rp__heading {
+  margin: 0 0 calc(10 * var(--u));
+  font-weight: 500;
+  font-size: calc(20 * var(--u));
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.rp__picked {
+  font-weight: 400;
+  font-size: calc(17 * var(--u));
+  color: var(--gray-label);
+}
+
+.cal {
+  --cell: calc(38 * var(--u));
+  position: relative;
+}
+.cal__months {
+  display: block;
+}
+.cal__nav {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: calc(4 * var(--u));
+}
+.cal__nav-btn {
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+  display: grid;
+  place-items: center;
+  border: calc(1 * var(--u)) solid var(--ink);
+}
+.cal__nav-btn[aria-disabled='true'] {
+  border-color: var(--gray-disabled);
+  color: var(--gray-disabled);
+  cursor: default;
+}
+.cal__chevron {
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
+}
+.cal__caption {
+  height: calc(28 * var(--u));
+  display: flex;
+  align-items: center;
+}
+.cal__caption-label {
+  font-size: calc(18 * var(--u));
+  text-transform: lowercase;
+}
+.cal__grid {
+  border-collapse: collapse;
+  margin-top: calc(8 * var(--u));
+  width: 100%;
+}
+.cal__weekday {
+  font-weight: 400;
+  font-size: calc(13 * var(--u));
+  color: var(--gray-label);
+  height: calc(22 * var(--u));
+  text-transform: lowercase;
+}
+.cal__day {
+  padding: 0;
+  height: var(--cell);
+  text-align: center;
+  position: relative;
+}
+.cal__day-btn {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: calc(16 * var(--u));
+  border: calc(1 * var(--u)) solid transparent;
+}
+.cal__day-btn:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+.cal__day--in-range {
+  background: var(--range-tint);
+}
+.cal__day--start .cal__day-btn,
+.cal__day--end .cal__day-btn,
+.cal__day--selected .cal__day-btn {
+  background: var(--ink);
+  color: var(--paper);
+}
+.cal__day--today .cal__day-btn {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.cal__day--outside .cal__day-btn {
+  color: var(--gray-value);
+}
+.cal__day--disabled .cal__day-btn {
+  color: var(--gray-disabled);
+  cursor: not-allowed;
+  text-decoration: line-through;
+  text-decoration-thickness: calc(1 * var(--u));
+}
+.cal__day--hidden {
+  visibility: hidden;
+}
+
+.rp__footer {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  margin-top: calc(14 * var(--u));
+  justify-content: flex-end;
+}
+.rp__count {
+  margin-right: auto;
+  font-size: calc(15 * var(--u));
+  color: var(--gray-label);
+}
+
+.btn {
+  font-size: calc(17 * var(--u));
+  line-height: calc(36 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+}
+.btn--ink {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn:disabled {
+  background: var(--chip);
+  border-color: var(--chip);
+  color: var(--gray-label);
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .rp {
+    position: fixed;
+    inset: auto 0 0 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: none;
+    padding: calc(14 * var(--u)) calc(16 * var(--u));
+  }
+  .rp__calendars {
+    grid-template-columns: 1fr;
+    row-gap: calc(16 * var(--u));
+  }
+  .rp__side + .rp__side {
+    border-left: 0;
+    border-top: calc(1 * var(--u)) dashed var(--ink);
+    padding: calc(14 * var(--u)) 0 0;
+  }
+  .cal {
+    --cell: calc(44 * var(--u));
+  }
+}
