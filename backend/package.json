@@ -1,0 +1,3 @@
+{"name":"poff-volunteer-backend","private":true,"type":"module","version":"0.1.0",
+"scripts":{"start":"node src/server.js","test":"node --test tests/backend.test.js"},
+"dependencies":{"express":"^4.21.0","cookie-parser":"^1.4.7"}}
