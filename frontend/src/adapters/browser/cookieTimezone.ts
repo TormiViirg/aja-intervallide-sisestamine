@@ -31,17 +31,21 @@ function writeCookie(jar: CookieJar, name: string, value: string): void {
   jar.set(`${name}=${encodeURIComponent(value)}; Max-Age=${ONE_YEAR_S}; Path=/; SameSite=Lax`);
 }
 
+/** The Express backend reads the viewer's zone from a cookie named "tz" (GET /api/config → browserTz). */
+export const BACKEND_TZ_COOKIE = 'tz';
+
 export function createCookieTimezone(
   jar: CookieJar = documentJar,
   detect: () => string = () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+  zoneCookie: string = TZ_COOKIE,
 ): TimezonePreferencePort {
   return {
     rememberDeviceZone() {
       const zone = detect() || 'UTC';
-      if (readCookie(jar, TZ_COOKIE) !== zone) writeCookie(jar, TZ_COOKIE, zone);
+      if (readCookie(jar, zoneCookie) !== zone) writeCookie(jar, zoneCookie, zone);
       return zone;
     },
-    storedZone: () => readCookie(jar, TZ_COOKIE),
+    storedZone: () => readCookie(jar, zoneCookie),
     isWarningCollapsed() {
       const v = readCookie(jar, TZ_WARNING_COOKIE);
       return v === null ? null : v === 'collapsed';

@@ -3,13 +3,14 @@
  * warnings to go back and check, and the publish choice (now / scheduled in Estonian time /
  * save progress only).
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TeamId } from '../../domain/brand';
-import { type DayEntry, entryWall } from '../../domain/interval';
+import { type DayEntry, EMPTY_ENTRY, entryWall, sameEntry } from '../../domain/interval';
 import { parseScheduledPublish, type PublishChoice, type ScheduleProblem } from '../../domain/publish';
 import { addDays, type DateKey, formatDayMonth, formatWallTime, tallinnDateOf, utcToWall, wallToUtc } from '../../domain/time';
 import { buildOverview } from '../../application/selectors';
+import { entryOf, selectedTeams } from '../../domain/workspace';
 import { useApp, useWorkflowState } from '../AppProvider';
 import { ArrowIcon } from '../icons';
 import './overview.css';
@@ -28,6 +29,7 @@ export function Overview() {
   const { state, data, workflow, dispatch, ports } = useApp();
   const wf = useWorkflowState();
   const model = useMemo(() => buildOverview(state, data.ref, data.volunteers, data.submissions), [state, data]);
+  const serverImpact = useServerImpact();
   const teamName = (id: TeamId) => data.ref.teams.find((x) => x.id === id)?.name ?? id;
 
   const nowMs = ports.clock.now();
@@ -139,21 +141,16 @@ export function Overview() {
             </div>
             <div>
               <h3>{t('overview.affectedTitle')}</h3>
-              <p className="ov__summary" data-testid={`impact-${team.teamId}`}>
-                {t('overview.affectedCount', { affected: team.affected.length, notify: team.notify.length })}
-              </p>
-              {team.affected.length ? (
-                <ul className="ov__names">
-                  {team.affected.map((id) => (
-                    <li key={id} className={team.notify.includes(id) ? 'ov__notify' : undefined}>
-                      {model.names.get(id) ?? id}
-                      {team.notify.includes(id) ? <span className="ov__tag">{t('overview.notifyMark')}</span> : null}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="ov__muted">{t('overview.nobodyAffected')}</p>
-              )}
+              <ImpactNames
+                testId={`impact-${team.teamId}`}
+                // The backend's own judgement when it offers one, else the local calculation.
+                impact={
+                  serverImpact.get(team.teamId) ?? {
+                    affected: team.affected.map((id) => model.names.get(id) ?? id),
+                    notify: team.notify.map((id) => model.names.get(id) ?? id),
+                  }
+                }
+              />
             </div>
           </div>
         </section>
@@ -220,5 +217,71 @@ export function Overview() {
         </button>
       </section>
     </main>
+  );
+}
+
+type ServerImpact = { readonly affected: readonly string[]; readonly notify: readonly string[] };
+
+/**
+ * Asks the backend (when its port supports it) who is touched by the days changed since the
+ * last version the server holds. Without a published-version endpoint that baseline is the
+ * last saved draft.
+ */
+function useServerImpact(): ReadonlyMap<string, ServerImpact> {
+  const { ports, state } = useApp();
+  const [result, setResult] = useState<ReadonlyMap<string, ServerImpact>>(new Map());
+  useEffect(() => {
+    const preview = ports.schedules.previewImpact?.bind(ports.schedules);
+    if (!preview) return;
+    let cancelled = false;
+    void Promise.all(
+      selectedTeams(state.ws).map(async (team) => {
+        const baseline = team.published ?? team.saved;
+        const edits: Record<DateKey, DayEntry> = {};
+        for (const d of Object.keys({ ...team.entries, ...baseline }) as DateKey[]) {
+          const now = entryOf(team, d);
+          // The server rejects the whole preview for a half-filled day; those are warned about separately.
+          const judgeable = (now.start === null) === (now.end === null);
+          if (judgeable && !sameEntry(now, baseline[d] ?? EMPTY_ENTRY)) edits[d] = now;
+        }
+        const r: ServerImpact | null = Object.keys(edits).length
+          ? await preview(team.teamId, edits, state.ws.locationIds)
+          : { affected: [], notify: [] };
+        return [team.teamId, r] as const;
+      }),
+    ).then((pairs) => {
+      if (cancelled) return;
+      const known = new Map<string, ServerImpact>();
+      for (const [id, r] of pairs) if (r) known.set(id, r);
+      setResult(known);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [ports, state.ws]);
+  return result;
+}
+
+function ImpactNames({ impact, testId }: { impact: ServerImpact; testId: string }) {
+  const { t } = useTranslation();
+  const notify = new Set(impact.notify);
+  return (
+    <>
+      <p className="ov__summary" data-testid={testId}>
+        {t('overview.affectedCount', { affected: impact.affected.length, notify: notify.size })}
+      </p>
+      {impact.affected.length ? (
+        <ul className="ov__names">
+          {impact.affected.map((name) => (
+            <li key={name} className={notify.has(name) ? 'ov__notify' : undefined}>
+              {name}
+              {notify.has(name) ? <span className="ov__tag">{t('overview.notifyMark')}</span> : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ov__muted">{t('overview.nobodyAffected')}</p>
+      )}
+    </>
   );
 }
