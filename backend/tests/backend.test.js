@@ -5,10 +5,49 @@ import { inRange } from '../src/domain/config.js';
 import { impact, filterVolunteers } from '../src/domain/volunteers.js';
 import { parseScheduled } from '../src/domain/schedule.js';
 import { createMemoryRepository, SEED_VOLUNTEERS } from '../src/adapters/memoryRepository.js';
+import { createSupabaseRepository } from '../src/adapters/supabaseRepository.js';
 import { createScheduleService, ValidationError } from '../src/services/scheduleService.js';
 import { runContract } from './repository.contract.js';
 
 runContract('memory', () => createMemoryRepository());
+test('Supabase repository maps reads, filters volunteers, and persists schedules', async () => {
+  const rows = {
+    app_config: { allowed_range: { from: '2026-10-26', to: '2026-11-24' }, opening_times: { open: '07:45', close: '19:45', cinema: 'Solaris' } },
+    teams: [{ id: 'usher', name: 'Piletikontroll' }],
+    volunteers: [{ id: 1, name: 'Mari Tamm', festival: 'poff30', team: 'usher', location: 'Solaris', opened: [] }],
+    drafts: null,
+    publications: [],
+  };
+  const queries = [];
+  const client = { from: (table) => {
+    const filters = [];
+    queries.push({ table, filters });
+    return {
+      select() { return this; },
+      eq(column, value) { filters.push(['eq', column, value]); return this; },
+      in(column, value) { filters.push(['in', column, value]); return this; },
+      order() { return this; },
+      single: async () => ({ data: rows[table], error: null }),
+      maybeSingle: async () => ({ data: rows[table], error: null }),
+      upsert: async (record) => { rows.drafts = { schedule: record.schedule }; return { data: null, error: null }; },
+      insert: async (record) => { rows.publications.push(record); return { data: null, error: null }; },
+      then: (resolve, reject) => Promise.resolve({ data: rows[table], error: null }).then(resolve, reject),
+    };
+  } };
+  const repo = createSupabaseRepository(client);
+  assert.deepEqual(await repo.getConfig(), { allowedRange: rows.app_config.allowed_range, openingTimes: rows.app_config.opening_times });
+  assert.deepEqual(await repo.listTeams(), rows.teams);
+  assert.deepEqual(await repo.listVolunteers({ festival: 'poff30', team: 'usher', locations: ['Solaris'] }), rows.volunteers);
+  assert.deepEqual(queries.at(-1).filters, [['eq', 'festival', 'poff30'], ['eq', 'team', 'usher'], ['in', 'location', ['Solaris']]]);
+
+  const values = { '2026-10-27': { start: '10:00', end: '12:00' } };
+  await repo.saveDraft('usher', values);
+  assert.deepEqual(await repo.getDraft('usher'), values);
+  const publication = { values, publishAt: '2026-10-15T10:00:00.000Z', status: 'published' };
+  await repo.savePublication('usher', publication);
+  assert.deepEqual(rows.publications[0], { team_id: 'usher', schedule: values, publish_at: publication.publishAt, status: 'published' });
+});
+
 const NOW = new Date('2026-10-15T10:00:00Z'); // Estonia is UTC+3 (EEST) until 2026-10-25
 const svc = () => { const repo = createMemoryRepository(); return { repo, s: createScheduleService({ repo, clock: () => NOW }) }; };
 const ok = { '2026-10-27': { start: '10:00', end: '21:45' } };
